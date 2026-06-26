@@ -55,12 +55,13 @@ class GlobalExceptionHandler {
 
     // Unexpected Errors (500)
     @ExceptionHandler(Exception::class)
-    fun handleGeneralException(ex: Exception): ResponseEntity<ErrorResponse> {
+    fun handleGenericException(ex: Exception): ResponseEntity<ErrorResponse> {
         val error = ErrorResponse(
             status = HttpStatus.INTERNAL_SERVER_ERROR.value(),
             error = "Internal Server Error",
             message = "An unexpected error occurred."
         )
+        ex.printStackTrace()
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error)
     }
 }
