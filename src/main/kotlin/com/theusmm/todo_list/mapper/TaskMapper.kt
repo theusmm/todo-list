@@ -11,7 +11,7 @@ fun TaskCreateRequestDto.toCreateEntity(user: User): Task {
         title = this.title,
         description = this.description,
         priority = this.priority,
-        scheduledDate = this.scheduledDate,
+        dueDate = this.dueDate,
         user = user
     )
 }
@@ -21,7 +21,7 @@ fun TaskUpdateRequestDto.toUpdateEntity(task: Task) {
     task.description = this.description
     task.status = this.status
     task.priority = this.priority
-    task.scheduledDate = this.scheduledDate
+    task.dueDate = this.dueDate
 }
 
 fun Task.toTaskResponseDto() = TaskResponseDto(
@@ -30,6 +30,6 @@ fun Task.toTaskResponseDto() = TaskResponseDto(
     description = this.description,
     status = this.status,
     priority = this.priority,
-    scheduledDate = this.scheduledDate,
+    dueDate = this.dueDate,
     userId = this.user.id
 )

@@ -23,5 +23,5 @@ data class TaskUpdateRequestDto(
 
     @field:NotNull(message = "Scheduled date is required")
     @field:FutureOrPresent(message = "Scheduled date cannot be in the past")
-    val scheduledDate: LocalDate?
+    val dueDate: LocalDate?
 )

@@ -10,13 +10,13 @@ class User (
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long? = null,
 
-    @Column(nullable = false, length = 50)
+    @Column(nullable = false, length = 100)
     var name: String,
 
     @Column(nullable = false, unique = true)
     var email: String,
 
-    @Column(nullable = false, length = 30)
+    @Column(nullable = false)
     var password: String,
 
     @OneToMany(mappedBy = "user", cascade = [CascadeType.ALL], orphanRemoval = true)

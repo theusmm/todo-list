@@ -6,7 +6,7 @@ import jakarta.validation.constraints.Size
 
 data class UserCreateRequestDto(
     @field:NotBlank(message = "Name is required")
-    @field:Size(max = 50, message = "Name must contain a maximum of 50 characters.")
+    @field:Size(max = 100, message = "Name must contain a maximum of 100 characters.")
     val name: String,
 
     @field:NotBlank(message = "Email is required")

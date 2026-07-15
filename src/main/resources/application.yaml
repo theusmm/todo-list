@@ -3,20 +3,22 @@ spring:
     name: todo-list
 
   datasource:
-    url: jdbc:h2:mem:todo-list
-    driver-class-name: org.h2.Driver
+    url: jdbc:postgresql://localhost:5433/todolist
+    driver-class-name: org.postgresql.Driver
     username: sa
-    password:
+    password: password
 
   jpa:
-    database-platform: org.hibernate.dialect.H2Dialect
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
     show-sql: true
+    deferred-initialization: true
 
-  h2:
-    console:
-      enabled: true
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    locations: classpath:db/migration
 
   data:
     redis:

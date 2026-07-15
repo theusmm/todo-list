@@ -11,6 +11,6 @@ data class TaskResponseDto(
     val description: String?,
     val status: TaskStatus,
     val priority: TaskPriority,
-    val scheduledDate: LocalDate?,
+    val dueDate: LocalDate?,
     val userId: Long?
 ) : Serializable

@@ -31,7 +31,7 @@ class Task(
     var priority: TaskPriority,
 
     @Column(name = "due_date")
-    var scheduledDate: LocalDate?,
+    var dueDate: LocalDate?,
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
@@ -47,7 +47,7 @@ class Task(
 
 
     override fun toString(): String =
-        "Task(id=$id, title='$title', status=$status, priority=$priority, scheduledDate=$scheduledDate)"
+        "Task(id=$id, title='$title', status=$status, priority=$priority, scheduledDate=$dueDate)"
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
