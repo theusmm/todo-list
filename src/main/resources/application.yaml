@@ -28,3 +28,8 @@ spring:
   cache:
     redis:
       time-to-live: 10m
+
+api:
+  security:
+    token:
+      secret: "!321-security-key-token-123@"

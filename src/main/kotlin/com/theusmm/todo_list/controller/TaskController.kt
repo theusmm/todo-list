@@ -4,6 +4,7 @@ import com.theusmm.todo_list.dto.CustomPageDto
 import com.theusmm.todo_list.dto.request.TaskCreateRequestDto
 import com.theusmm.todo_list.dto.request.TaskUpdateRequestDto
 import com.theusmm.todo_list.dto.response.TaskResponseDto
+import com.theusmm.todo_list.entity.User
 import com.theusmm.todo_list.mapper.toTaskResponseDto
 import com.theusmm.todo_list.service.TaskService
 import jakarta.validation.Valid
@@ -12,6 +13,8 @@ import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PageableDefault
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.security.core.annotation.AuthenticationPrincipal
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.bind.annotation.*
 
 @RestController
@@ -43,13 +46,18 @@ class TaskController(private val service: TaskService) {
         return ResponseEntity.ok(responsePage)
     }
 
-    @PostMapping("/user/{userId}")
-    fun create(
-        @Valid @RequestBody task: TaskCreateRequestDto,
-        @PathVariable userId: Long): ResponseEntity<TaskResponseDto>
-    {
-        val newTask = service.createTask(task, userId)
-        return ResponseEntity.status(HttpStatus.CREATED).body(newTask)
+    @GetMapping("/me")
+    fun getMyTasks(
+        @PageableDefault(page = 0, size = 10, sort = ["id"]) pageable: Pageable,
+        @AuthenticationPrincipal user: User
+    ): ResponseEntity<CustomPageDto<TaskResponseDto>> {
+        return ResponseEntity.ok(service.getLoggedUserTasks(user.email, pageable))
+    }
+
+    @PostMapping()
+    fun create(@Valid @RequestBody task: TaskCreateRequestDto): ResponseEntity<TaskResponseDto> {
+        val response = service.createTask(task)
+        return ResponseEntity.status(HttpStatus.CREATED).body(response)
     }
 
     @PutMapping("/{taskId}")

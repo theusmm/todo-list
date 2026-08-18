@@ -15,7 +15,7 @@ fun UserCreateRequestDto.toCreateEntity(): User {
 
 fun UserUpdateRequestDto.toUpdateEntity(user: User) {
     user.name = this.name
-    user.password = this.password
+    //user.password = this.password
 }
 
 fun User.toUserResponseDto() = UserResponseDto(

@@ -5,6 +5,7 @@ import com.theusmm.todo_list.dto.request.TaskCreateRequestDto
 import com.theusmm.todo_list.dto.request.TaskUpdateRequestDto
 import com.theusmm.todo_list.dto.response.TaskResponseDto
 import com.theusmm.todo_list.entity.Task
+import com.theusmm.todo_list.entity.User
 import com.theusmm.todo_list.mapper.toCreateEntity
 import com.theusmm.todo_list.mapper.toTaskResponseDto
 import com.theusmm.todo_list.mapper.toUpdateEntity
@@ -13,6 +14,7 @@ import jakarta.transaction.Transactional
 import org.springframework.cache.annotation.CacheEvict
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.data.domain.Pageable
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Service
 
 @Service
@@ -42,18 +44,29 @@ fun getTaskById(taskId: Long): TaskResponseDto {
         return CustomPageDto(responseTask)
     }
 
-    @CacheEvict(cacheNames = ["tasks", "tasksByUserId"], allEntries = true)
-    @Transactional
-    fun createTask(task: TaskCreateRequestDto, userId: Long): TaskResponseDto {
-        val user = userService.checkIfUserExists(userId)
-        val newTask = task.toCreateEntity(user)
+    @Cacheable(
+        cacheNames = ["tasksByLoggedUser"],
+        key = "#email + '-' + #pageable.pageNumber + '-' + #pageable.pageSize"
+    )
+    fun getLoggedUserTasks(email: String, pageable: Pageable): CustomPageDto<TaskResponseDto> {
+        val authenticatedUser = SecurityContextHolder.getContext().authentication!!.principal as User
 
-        user.addTask(newTask)
+        val tasksPage = repository.findByUserId(authenticatedUser.id!!, pageable)
+        return CustomPageDto(tasksPage.map { it.toTaskResponseDto() })
+    }
+
+    @CacheEvict(cacheNames = ["tasks", "tasksByUserId", "tasksByLoggedUser"], allEntries = true)
+    @Transactional
+    fun createTask(task: TaskCreateRequestDto): TaskResponseDto {
+        val authenticatedUser = SecurityContextHolder.getContext().authentication!!.principal as User
+
+        val newTask = task.toCreateEntity(authenticatedUser)
+
         val savedTask = repository.save(newTask).toTaskResponseDto()
         return savedTask
     }
 
-    @CacheEvict(cacheNames = ["tasks", "tasksByUserId"], allEntries = true)
+    @CacheEvict(cacheNames = ["tasks", "tasksByUserId", "tasksByLoggedUser"], allEntries = true)
     @Transactional
     fun updateTask(task: TaskUpdateRequestDto, taskId: Long): TaskResponseDto {
         val updatedTask = checkIfTaskExists(taskId)
@@ -63,7 +76,7 @@ fun getTaskById(taskId: Long): TaskResponseDto {
         return savedTask
     }
 
-    @CacheEvict(cacheNames = ["tasks", "tasksByUserId"], allEntries = true)
+    @CacheEvict(cacheNames = ["tasks", "tasksByUserId", "tasksByLoggedUser"], allEntries = true)
     @Transactional
     fun deleteTask(taskId: Long) {
         val task = checkIfTaskExists(taskId)

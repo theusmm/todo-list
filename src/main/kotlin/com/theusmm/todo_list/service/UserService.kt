@@ -15,10 +15,13 @@ import jakarta.transaction.Transactional
 import org.springframework.cache.annotation.CacheEvict
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.data.domain.Pageable
+import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 
 @Service
-class UserService(private val repository: UserRepository) {
+class UserService(
+    private val repository: UserRepository,
+    private val passwordEncoder: PasswordEncoder) {
 
     @Cacheable(cacheNames = ["users"], key = "#pageable.pageNumber + '-' + #pageable.pageSize")
     fun getAllUsers(pageable: Pageable): CustomPageDto<UserResponseDto> {
@@ -40,6 +43,7 @@ class UserService(private val repository: UserRepository) {
         }
 
         val newUser = user.toCreateEntity()
+        newUser.password = passwordEncoder.encode(user.password)!!
         val savedUser = repository.save(newUser).toUserResponseDto()
 
         return savedUser
@@ -50,6 +54,8 @@ class UserService(private val repository: UserRepository) {
     fun updateUser(user: UserUpdateRequestDto, userId: Long): UserResponseDto {
         val updatedUser = checkIfUserExists(userId)
         user.toUpdateEntity(updatedUser)
+
+        updatedUser.password = passwordEncoder.encode(user.password)!!
 
         val savedUser = repository.save(updatedUser).toUserResponseDto()
         return savedUser
