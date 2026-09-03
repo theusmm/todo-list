@@ -5,3 +5,5 @@ import java.lang.RuntimeException
 class ResourceNotFoundException(message: String) : RuntimeException(message)
 
 class BusinessException(message: String) : RuntimeException(message)
+
+class AccessDeniedException(message: String) : kotlin.RuntimeException(message)

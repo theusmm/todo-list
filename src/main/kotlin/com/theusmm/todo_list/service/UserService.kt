@@ -5,7 +5,8 @@ import com.theusmm.todo_list.dto.request.UserCreateRequestDto
 import com.theusmm.todo_list.dto.request.UserUpdateRequestDto
 import com.theusmm.todo_list.dto.response.UserResponseDto
 import com.theusmm.todo_list.entity.User
-import com.theusmm.todo_list.exception.BusinessException
+import com.theusmm.todo_list.entity.UserRole
+import com.theusmm.todo_list.exception.AccessDeniedException
 import com.theusmm.todo_list.exception.ResourceNotFoundException
 import com.theusmm.todo_list.mapper.toCreateEntity
 import com.theusmm.todo_list.mapper.toUpdateEntity
@@ -31,22 +32,34 @@ class UserService(
 
     fun getUserById(userId: Long): UserResponseDto {
         val user = checkIfUserExists(userId)
-        val responseUser = user.toUserResponseDto()
-        return responseUser
+        return user.toUserResponseDto()
     }
 
+    // users with role USER
     @CacheEvict(cacheNames = ["users"], allEntries = true)
     @Transactional
     fun createUser(user: UserCreateRequestDto): UserResponseDto {
+        return saveUserWithRole(user, UserRole.USER).toUserResponseDto()
+    }
+
+    // users with role ADMIN
+    @CacheEvict(cacheNames = ["users"], allEntries = true)
+    @Transactional
+    fun createAdmin(user: UserCreateRequestDto): UserResponseDto {
+        return saveUserWithRole(user, UserRole.ADMIN).toUserResponseDto()
+    }
+
+    // create users
+    private fun saveUserWithRole(user: UserCreateRequestDto, role: UserRole): User {
         if (repository.existsByEmail(user.email)) {
-            throw BusinessException("This E-mail is already registered")
+            throw AccessDeniedException("This E-mail is already registered!")
         }
 
         val newUser = user.toCreateEntity()
         newUser.password = passwordEncoder.encode(user.password)!!
-        val savedUser = repository.save(newUser).toUserResponseDto()
+        newUser.role = role
 
-        return savedUser
+        return repository.save(newUser)
     }
 
     @CacheEvict(cacheNames = ["users"], allEntries = true)
@@ -57,8 +70,7 @@ class UserService(
 
         updatedUser.password = passwordEncoder.encode(user.password)!!
 
-        val savedUser = repository.save(updatedUser).toUserResponseDto()
-        return savedUser
+        return repository.save(updatedUser).toUserResponseDto()
     }
 
     @CacheEvict(cacheNames = ["users"], allEntries = true)

@@ -19,6 +19,10 @@ class User (
     @Column(nullable = false)
     var password: String,
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    var role: UserRole = UserRole.USER,
+
     @OneToMany(mappedBy = "user", cascade = [CascadeType.ALL], orphanRemoval = true)
     val tasks: MutableSet<Task> = mutableSetOf()
 ) {

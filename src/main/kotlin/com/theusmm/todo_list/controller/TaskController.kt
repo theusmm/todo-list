@@ -21,29 +21,14 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping("/tasks")
 class TaskController(private val service: TaskService) {
 
-    @GetMapping
-    fun getAll(
-        @PageableDefault(page = 0, size = 10, sort = ["id"]) pageable: Pageable
-    ): ResponseEntity<CustomPageDto<TaskResponseDto>> {
-
-        val responsePage = service.getAllTasks(pageable)
-        return ResponseEntity.ok(responsePage)
-    }
-
-    @GetMapping("/{taskId}")
-    fun getById(@PathVariable taskId: Long): ResponseEntity<TaskResponseDto> {
-        val task = service.getTaskById(taskId)
-        return ResponseEntity.ok(task)
-    }
-
-    @GetMapping("/user/{userId}")
-    fun getByUserId(
-        @PathVariable userId: Long,
-        @PageableDefault(page = 0, size = 10, sort = ["id"]) pageable: Pageable
-    ): ResponseEntity<CustomPageDto<TaskResponseDto>> {
-
-        val responsePage = service.getTasksByUserId(userId, pageable)
-        return ResponseEntity.ok(responsePage)
+    // ================== ALL USERS ==================
+    @PostMapping()
+    fun create(
+        @Valid @RequestBody task: TaskCreateRequestDto,
+        @AuthenticationPrincipal user: User
+    ): ResponseEntity<TaskResponseDto> {
+        val response = service.createTask(task, user)
+        return ResponseEntity.status(HttpStatus.CREATED).body(response)
     }
 
     @GetMapping("/me")
@@ -51,27 +36,68 @@ class TaskController(private val service: TaskService) {
         @PageableDefault(page = 0, size = 10, sort = ["id"]) pageable: Pageable,
         @AuthenticationPrincipal user: User
     ): ResponseEntity<CustomPageDto<TaskResponseDto>> {
-        return ResponseEntity.ok(service.getLoggedUserTasks(user.email, pageable))
+        return ResponseEntity.ok(service.getLoggedUserTasks(user, pageable))
     }
 
-    @PostMapping()
-    fun create(@Valid @RequestBody task: TaskCreateRequestDto): ResponseEntity<TaskResponseDto> {
-        val response = service.createTask(task)
-        return ResponseEntity.status(HttpStatus.CREATED).body(response)
-    }
-
-    @PutMapping("/{taskId}")
-    fun update(
+    @PutMapping("/me/{taskId}")
+    fun updateMyTask(
         @Valid @RequestBody task: TaskUpdateRequestDto,
-        @PathVariable taskId: Long): ResponseEntity<TaskResponseDto>
+        @PathVariable taskId: Long,
+        @AuthenticationPrincipal loggedUser: User
+    ): ResponseEntity<TaskResponseDto>
     {
-        val updatedTask = service.updateTask(task, taskId)
+        val updatedTask = service.updateTask(task, taskId, loggedUser)
         return ResponseEntity.ok(updatedTask)
     }
 
-    @DeleteMapping("/{taskId}")
-    fun delete(@PathVariable taskId: Long): ResponseEntity<Unit> {
-        service.deleteTask(taskId)
+    @DeleteMapping("/me/{taskId}")
+    fun deleteMyTask(
+        @PathVariable taskId: Long,
+        @AuthenticationPrincipal loggedUser: User
+    ): ResponseEntity<Unit> {
+        service.deleteTask(taskId, loggedUser)
+        return ResponseEntity.noContent().build()
+    }
+
+    // ================== ADMIN ==================
+
+    @GetMapping("/admin")
+    fun getAll(
+        @PageableDefault(page = 0, size = 10, sort = ["id"]) pageable: Pageable
+    ): ResponseEntity<CustomPageDto<TaskResponseDto>> {
+        return ResponseEntity.ok(service.getAllTasks(pageable))
+    }
+
+    @GetMapping("/admin/{taskId}")
+    fun getById(@PathVariable taskId: Long): ResponseEntity<TaskResponseDto> {
+        return ResponseEntity.ok(service.getTaskById(taskId))
+    }
+
+    @GetMapping("/admin/user/{userId}")
+    fun getByUserId(
+        @PathVariable userId: Long,
+        @PageableDefault(page = 0, size = 10, sort = ["id"]) pageable: Pageable
+    ): ResponseEntity<CustomPageDto<TaskResponseDto>> {
+        return ResponseEntity.ok(service.getTasksByUserId(userId, pageable))
+    }
+
+    @PutMapping("/admin/{taskId}")
+    fun updateByTask(
+        @Valid @RequestBody task: TaskUpdateRequestDto,
+        @PathVariable taskId: Long,
+        @AuthenticationPrincipal loggedUser: User
+    ): ResponseEntity<TaskResponseDto>
+    {
+        val updatedTask = service.updateTask(task, taskId, loggedUser)
+        return ResponseEntity.ok(updatedTask)
+    }
+
+    @DeleteMapping("/admin/{taskId}")
+    fun deleteByTask(
+        @PathVariable taskId: Long,
+        @AuthenticationPrincipal loggedUser: User
+    ): ResponseEntity<Unit> {
+        service.deleteTask(taskId, loggedUser)
         return ResponseEntity.noContent().build()
     }
 }

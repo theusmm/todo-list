@@ -1,12 +1,12 @@
 package com.theusmm.todo_list.config
 
-import com.theusmm.todo_list.dto.request.LoginRequestDto
 import com.theusmm.todo_list.repository.UserRepository
 import com.theusmm.todo_list.service.TokenService
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
+import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
 import org.springframework.web.filter.OncePerRequestFilter
@@ -31,7 +31,12 @@ class SecurityFilter(
                 val user = userRepository.findByEmail(email)
 
                 if (user != null) {
-                    val authentication = UsernamePasswordAuthenticationToken(user, null, emptyList())
+                    // CONVERTE A ROLE DO USUÁRIO PARA O SPRING SECURITY
+                    // O Spring Security exige por padrão que perfis comecem com o prefixo "ROLE_"
+                    val authorities = listOf(SimpleGrantedAuthority("ROLE_${user.role.name}"))
+
+                    val authentication = UsernamePasswordAuthenticationToken(user, null, authorities)
+
                     SecurityContextHolder.getContext().authentication = authentication
                 }
             }

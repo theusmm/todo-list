@@ -23,6 +23,7 @@ class TokenService {
             return JWT.create()
                 .withIssuer("todo-list-api")
                 .withSubject(user.email)
+                .withClaim("role", user.role.name)
                 .withExpiresAt(genExpirationDate())
                 .sign(algorithm)
         } catch (exception: JWTCreationException) {
@@ -44,6 +45,6 @@ class TokenService {
     }
 
     private fun genExpirationDate(): Instant {
-        return LocalDateTime.now().plusMinutes(5).toInstant(ZoneOffset.of("-03:00"))
+        return LocalDateTime.now().plusMinutes(30).toInstant(ZoneOffset.of("-03:00"))
     }
 }
