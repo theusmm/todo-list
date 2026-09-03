@@ -29,6 +29,10 @@ spring:
     redis:
       time-to-live: 10m
 
+  jackson:
+    deserialization:
+      accept-empty-string-as-null-object: true
+
 api:
   security:
     token:

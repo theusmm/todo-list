@@ -6,6 +6,7 @@ import com.theusmm.todo_list.exception.ResourceNotFoundException
 import jakarta.servlet.http.HttpServletRequest
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.http.converter.HttpMessageNotReadableException
 import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
@@ -79,6 +80,24 @@ class GlobalExceptionHandler {
             error = "Validation Error",
             message = errors
         )
+        return ResponseEntity.status(status).body(error)
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException::class)
+    fun handleHttpMessageNotReadable(
+        ex: HttpMessageNotReadableException,
+        request: HttpServletRequest
+    ): ResponseEntity<Any> {
+
+        val status = HttpStatus.BAD_REQUEST
+
+        val error = ErrorResponse(
+            status = status.value(),
+            error = "Bad Request",
+            message = "Invalid data format or invalid values for Enum fields.",
+            path = request.requestURI
+        )
+
         return ResponseEntity.status(status).body(error)
     }
 
