@@ -10,9 +10,10 @@ import com.theusmm.todo_list.entity.UserRole
 import com.theusmm.todo_list.exception.BusinessException
 import com.theusmm.todo_list.exception.ResourceNotFoundException
 import com.theusmm.todo_list.mapper.toCreateEntity
-import com.theusmm.todo_list.mapper.toTaskResponseDto
+import com.theusmm.todo_list.mapper.toResponseDto
 import com.theusmm.todo_list.mapper.toUpdateEntity
 import com.theusmm.todo_list.repository.TaskRepository
+import com.theusmm.todo_list.repository.UserRepository
 import jakarta.transaction.Transactional
 import org.springframework.cache.annotation.CacheEvict
 import org.springframework.cache.annotation.Cacheable
@@ -22,7 +23,8 @@ import org.springframework.stereotype.Service
 @Service
 class TaskService(
     private val repository: TaskRepository,
-    private val userService: UserService
+    private val userService: UserService,
+    private val userRepository: UserRepository,
 ) {
 
     // ================== ALL USERS ==================
@@ -31,7 +33,17 @@ class TaskService(
     @Transactional
     fun createTask(task: TaskCreateRequestDto, loggedUser: User): TaskResponseDto {
         val newTask = task.toCreateEntity(loggedUser)
-        return repository.save(newTask).toTaskResponseDto()
+        return repository.save(newTask).toResponseDto()
+    }
+
+    @CacheEvict(cacheNames = ["tasks", "tasksByUserId", "tasksByLoggedUser"], allEntries = true)
+    @Transactional
+    fun createTaskForUser(task: TaskCreateRequestDto, userId: Long): TaskResponseDto {
+        val targetUser = userRepository.findById(userId)
+            .orElseThrow { ResourceNotFoundException("User not found") }
+
+        val newTask = task.toCreateEntity(targetUser)
+        return repository.save(newTask).toResponseDto()
     }
 
     @Cacheable(
@@ -40,7 +52,7 @@ class TaskService(
     )
     fun getLoggedUserTasks(loggedUser: User, pageable: Pageable): CustomPageDto<TaskResponseDto> {
         val tasksPage = repository.findByUserId(loggedUser.id!!, pageable)
-        return CustomPageDto(tasksPage.map { it.toTaskResponseDto() })
+        return CustomPageDto(tasksPage.map { it.toResponseDto() })
     }
 
     @CacheEvict(cacheNames = ["tasks", "tasksByUserId", "tasksByLoggedUser"], allEntries = true)
@@ -51,7 +63,7 @@ class TaskService(
         validateTaskOwnerOrAdmin(updateTask, loggedUser)
         task.toUpdateEntity(updateTask)
 
-        return repository.save(updateTask).toTaskResponseDto()
+        return repository.save(updateTask).toResponseDto()
     }
 
     @CacheEvict(cacheNames = ["tasks", "tasksByUserId", "tasksByLoggedUser"], allEntries = true)
@@ -68,22 +80,22 @@ class TaskService(
 
     @Cacheable(cacheNames = ["tasks"], key = "#pageable.pageNumber + '-' + #pageable.pageSize")
     fun getAllTasks(pageable: Pageable): CustomPageDto<TaskResponseDto> {
-        val tasksPage = repository.findAll(pageable).map { it.toTaskResponseDto() }
+        val tasksPage = repository.findAll(pageable).map { it.toResponseDto() }
         return CustomPageDto(tasksPage)
     }
 
 fun getTaskById(taskId: Long): TaskResponseDto {
         val task = checkIfTaskExists(taskId)
-        return task.toTaskResponseDto()
+        return task.toResponseDto()
     }
 
     @Cacheable(
         cacheNames = ["tasksByUserId"],
-        key = "#userId + '-' + #pageable.PageNumber + '-' + #pageable.pageSize"
+        key = "#userId + '-' + #pageable.pageNumber + '-' + #pageable.pageSize"
     )
     fun getTasksByUserId(userId: Long, pageable: Pageable): CustomPageDto<TaskResponseDto> {
         userService.getUserById(userId)
-        val responseTask = repository.findByUserId(userId, pageable).map { it.toTaskResponseDto() }
+        val responseTask = repository.findByUserId(userId, pageable).map { it.toResponseDto() }
         return CustomPageDto(responseTask)
     }
 

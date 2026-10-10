@@ -5,16 +5,13 @@ import com.theusmm.todo_list.dto.request.TaskCreateRequestDto
 import com.theusmm.todo_list.dto.request.TaskUpdateRequestDto
 import com.theusmm.todo_list.dto.response.TaskResponseDto
 import com.theusmm.todo_list.entity.User
-import com.theusmm.todo_list.mapper.toTaskResponseDto
 import com.theusmm.todo_list.service.TaskService
 import jakarta.validation.Valid
-import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PageableDefault
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
-import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.bind.annotation.*
 
 @RestController
@@ -61,6 +58,15 @@ class TaskController(private val service: TaskService) {
 
     // ================== ADMIN ==================
 
+    @PostMapping("/admin/users/{userId}")
+    fun createForUser(
+        @PathVariable userId: Long,
+        @Valid @RequestBody task: TaskCreateRequestDto
+    ): ResponseEntity<TaskResponseDto> {
+        val response = service.createTaskForUser(task, userId)
+        return ResponseEntity.status(HttpStatus.CREATED).body(response)
+    }
+
     @GetMapping("/admin")
     fun getAll(
         @PageableDefault(page = 0, size = 10, sort = ["id"]) pageable: Pageable
@@ -73,7 +79,7 @@ class TaskController(private val service: TaskService) {
         return ResponseEntity.ok(service.getTaskById(taskId))
     }
 
-    @GetMapping("/admin/user/{userId}")
+    @GetMapping("/admin/users/{userId}")
     fun getByUserId(
         @PathVariable userId: Long,
         @PageableDefault(page = 0, size = 10, sort = ["id"]) pageable: Pageable
@@ -82,7 +88,7 @@ class TaskController(private val service: TaskService) {
     }
 
     @PutMapping("/admin/{taskId}")
-    fun updateByTask(
+    fun updateByTaskId(
         @Valid @RequestBody task: TaskUpdateRequestDto,
         @PathVariable taskId: Long,
         @AuthenticationPrincipal loggedUser: User
@@ -93,7 +99,7 @@ class TaskController(private val service: TaskService) {
     }
 
     @DeleteMapping("/admin/{taskId}")
-    fun deleteByTask(
+    fun deleteByTaskId(
         @PathVariable taskId: Long,
         @AuthenticationPrincipal loggedUser: User
     ): ResponseEntity<Unit> {

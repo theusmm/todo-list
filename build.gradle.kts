@@ -32,16 +32,13 @@ dependencies {
 	implementation("org.flywaydb:flyway-core")
 	implementation("org.springframework.boot:spring-boot-starter-flyway")
 	runtimeOnly("org.flywaydb:flyway-database-postgresql:10.15.0")
-	implementation("org.postgresql:postgresql:42.7.2")
+	implementation("org.postgresql:postgresql:42.7.12")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
+	testImplementation("io.mockk:mockk:1.13.16")
 	testImplementation("org.springframework.boot:spring-boot-starter-data-jpa-test")
 	testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
-
-//implementation("org.springframework.boot:spring-boot-starter-flyway")
-//runtimeOnly("org.flywaydb:flyway-database-postgresql")
-//runtimeOnly("org.postgresql:postgresql")
 
 kotlin {
 	compilerOptions {

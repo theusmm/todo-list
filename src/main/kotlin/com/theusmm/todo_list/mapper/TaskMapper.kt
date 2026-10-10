@@ -24,7 +24,7 @@ fun TaskUpdateRequestDto.toUpdateEntity(task: Task) {
     task.dueDate = this.dueDate
 }
 
-fun Task.toTaskResponseDto() = TaskResponseDto(
+fun Task.toResponseDto() = TaskResponseDto(
     id = this.id,
     title = this.title,
     description = this.description,

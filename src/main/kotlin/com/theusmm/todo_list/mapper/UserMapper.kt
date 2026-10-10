@@ -18,7 +18,7 @@ fun UserUpdateRequestDto.toUpdateEntity(user: User) {
     //user.password = this.password
 }
 
-fun User.toUserResponseDto() = UserResponseDto(
+fun User.toResponseDto() = UserResponseDto(
     id = this.id,
     name = this.name,
     email = this.email

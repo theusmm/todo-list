@@ -10,7 +10,7 @@ import com.theusmm.todo_list.exception.AccessDeniedException
 import com.theusmm.todo_list.exception.ResourceNotFoundException
 import com.theusmm.todo_list.mapper.toCreateEntity
 import com.theusmm.todo_list.mapper.toUpdateEntity
-import com.theusmm.todo_list.mapper.toUserResponseDto
+import com.theusmm.todo_list.mapper.toResponseDto
 import com.theusmm.todo_list.repository.UserRepository
 import jakarta.transaction.Transactional
 import org.springframework.cache.annotation.CacheEvict
@@ -26,27 +26,27 @@ class UserService(
 
     @Cacheable(cacheNames = ["users"], key = "#pageable.pageNumber + '-' + #pageable.pageSize")
     fun getAllUsers(pageable: Pageable): CustomPageDto<UserResponseDto> {
-        val userPage = repository.findAll(pageable).map { it.toUserResponseDto() }
+        val userPage = repository.findAll(pageable).map { it.toResponseDto() }
         return CustomPageDto(userPage)
     }
 
     fun getUserById(userId: Long): UserResponseDto {
         val user = checkIfUserExists(userId)
-        return user.toUserResponseDto()
+        return user.toResponseDto()
     }
 
     // users with role USER
     @CacheEvict(cacheNames = ["users"], allEntries = true)
     @Transactional
     fun createUser(user: UserCreateRequestDto): UserResponseDto {
-        return saveUserWithRole(user, UserRole.USER).toUserResponseDto()
+        return saveUserWithRole(user, UserRole.USER).toResponseDto()
     }
 
     // users with role ADMIN
     @CacheEvict(cacheNames = ["users"], allEntries = true)
     @Transactional
     fun createAdmin(user: UserCreateRequestDto): UserResponseDto {
-        return saveUserWithRole(user, UserRole.ADMIN).toUserResponseDto()
+        return saveUserWithRole(user, UserRole.ADMIN).toResponseDto()
     }
 
     // create users
@@ -70,7 +70,7 @@ class UserService(
 
         updatedUser.password = passwordEncoder.encode(user.password)!!
 
-        return repository.save(updatedUser).toUserResponseDto()
+        return repository.save(updatedUser).toResponseDto()
     }
 
     @CacheEvict(cacheNames = ["users"], allEntries = true)
