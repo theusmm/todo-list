@@ -28,7 +28,7 @@ import kotlin.test.assertEquals
 class TaskServiceTest {
 
     @MockK
-    lateinit var repository: TaskRepository
+    lateinit var taskRepository: TaskRepository
     @MockK
     lateinit var userService: UserService
     @MockK
@@ -41,7 +41,7 @@ class TaskServiceTest {
         val loggedUser = createUserEntity(id = 12L)
         val request = createTaskCreateRequestDto(title = "create task", description = "authenticated user")
 
-        every { repository.save(any()) } answers { firstArg() }
+        every { taskRepository.save(any()) } answers { firstArg() }
 
         val response = taskService.createTask(request, loggedUser)
 
@@ -49,7 +49,7 @@ class TaskServiceTest {
         assertEquals("authenticated user", response.description)
 
         verify(exactly = 1) {
-            repository.save(match { savedTask ->
+            taskRepository.save(match { savedTask ->
                 savedTask.title == "create task" &&
                 savedTask.description == "authenticated user" &&
                 savedTask.user.id == loggedUser.id
@@ -64,13 +64,13 @@ class TaskServiceTest {
         val request = createTaskCreateRequestDto(title = "target user task")
 
         every { userRepository.findById(userId) } returns Optional.of(targetUser)
-        every { repository.save(any()) } answers { firstArg() }
+        every { taskRepository.save(any()) } answers { firstArg() }
 
         val response = taskService.createTaskForUser(request, userId)
 
         assertEquals("target user task", response.title)
 
-        verify(exactly = 1) { repository.save(match { savedTask ->
+        verify(exactly = 1) { taskRepository.save(match { savedTask ->
             savedTask.title == "target user task" &&
             savedTask.user.id == targetUser.id
         }) }
@@ -88,7 +88,7 @@ class TaskServiceTest {
         )
         val taskPage = PageImpl(tasks, pageable, tasks.size.toLong())
 
-        every { repository.findByUserId(loggedUser.id!!, pageable) } returns taskPage
+        every { taskRepository.findByUserId(loggedUser.id!!, pageable) } returns taskPage
 
         val result = taskService.getLoggedUserTasks(loggedUser, pageable)
 
@@ -96,7 +96,7 @@ class TaskServiceTest {
         assertEquals("first task", result.content[0].title)
         assertEquals("second task", result.content[1].title)
 
-        verify(exactly = 1) { repository.findByUserId(loggedUser.id!!, pageable) }
+        verify(exactly = 1) { taskRepository.findByUserId(loggedUser.id!!, pageable) }
     }
 
     @Test
@@ -110,7 +110,7 @@ class TaskServiceTest {
 
         assertEquals("User not found", exception.message)
 
-        verify(exactly = 0) { repository.save(any()) }
+        verify(exactly = 0) { taskRepository.save(any()) }
     }
 
     @Test
@@ -119,13 +119,13 @@ class TaskServiceTest {
         val pageable = PageRequest.of(0, 10)
         val emptyPage = PageImpl<Task>(emptyList(), pageable, 0)
 
-        every { repository.findByUserId(loggedUser.id!!, pageable) } returns emptyPage
+        every { taskRepository.findByUserId(loggedUser.id!!, pageable) } returns emptyPage
 
         val result = taskService.getLoggedUserTasks(loggedUser, pageable)
 
         assertEquals(0, result.content.size)
 
-        verify(exactly = 1) { repository.findByUserId(loggedUser.id!!, pageable) }
+        verify(exactly = 1) { taskRepository.findByUserId(loggedUser.id!!, pageable) }
     }
 
     @Test
@@ -135,15 +135,15 @@ class TaskServiceTest {
 
         val request = createTaskUpdateRequestDto(title = "new title")
 
-        every { repository.findById(5L) } returns Optional.of(task)
-        every { repository.save(any()) } answers { firstArg() }
+        every { taskRepository.findById(5L) } returns Optional.of(task)
+        every { taskRepository.save(any()) } answers { firstArg() }
 
         val response = taskService.updateTask(request, 5L, owner)
 
         assertEquals("new title", response.title)
 
         verify(exactly = 1) {
-            repository.save(match { savedTask ->
+            taskRepository.save(match { savedTask ->
                 savedTask.id == 5L &&
                 savedTask.title == "new title" &&
                 savedTask.user.id == owner.id
@@ -159,15 +159,15 @@ class TaskServiceTest {
 
         val request =  createTaskUpdateRequestDto(title = "new title")
 
-        every { repository.findById(5L) } returns Optional.of(task)
-        every { repository.save(any()) } answers { firstArg() }
+        every { taskRepository.findById(5L) } returns Optional.of(task)
+        every { taskRepository.save(any()) } answers { firstArg() }
 
         val response = taskService.updateTask(request, 5L, admin)
 
         assertEquals("new title", response.title)
 
         verify(exactly = 1) {
-            repository.save(match { savedTask ->
+            taskRepository.save(match { savedTask ->
                 savedTask.id == 5L &&
                 savedTask.title == "new title" &&
                 savedTask.user.id == owner.id
@@ -183,11 +183,11 @@ class TaskServiceTest {
 
         val request = createTaskUpdateRequestDto(title = "can not update")
 
-        every { repository.findById(5L) } returns Optional.of(task)
+        every { taskRepository.findById(5L) } returns Optional.of(task)
 
         assertThrows<BusinessException> { taskService.updateTask(request, 5L, invader) }
 
-        verify(exactly = 0) { repository.save(any()) }
+        verify(exactly = 0) { taskRepository.save(any()) }
     }
 
     @Test
@@ -197,11 +197,11 @@ class TaskServiceTest {
 
         val request = createTaskUpdateRequestDto()
 
-        every { repository.findById(taskId) } returns Optional.empty()
+        every { taskRepository.findById(taskId) } returns Optional.empty()
 
         assertThrows<ResourceNotFoundException> { taskService.updateTask(request, taskId, user) }
 
-        verify(exactly = 0) { repository.save(any()) }
+        verify(exactly = 0) { taskRepository.save(any()) }
     }
 
     @Test
@@ -209,12 +209,12 @@ class TaskServiceTest {
         val owner = createUserEntity(id = 10L, name = "owner")
         val task = createTaskEntity(id = 5L, user = owner)
 
-        every { repository.findById(5L) } returns Optional.of(task)
-        every { repository.delete(task) } returns Unit
+        every { taskRepository.findById(5L) } returns Optional.of(task)
+        every { taskRepository.delete(task) } returns Unit
 
         taskService.deleteTask(5L, owner)
 
-        verify(exactly = 1) { repository.delete(task) }
+        verify(exactly = 1) { taskRepository.delete(task) }
     }
 
     @Test
@@ -223,12 +223,12 @@ class TaskServiceTest {
         val admin = createUserEntity(id = 30L, name = "admin", email = "admin@email.com", role = UserRole.ADMIN)
         val task = createTaskEntity(id = 5L, user = owner)
 
-        every { repository.findById(5L) } returns Optional.of(task)
-        every { repository.delete(task) } returns Unit
+        every { taskRepository.findById(5L) } returns Optional.of(task)
+        every { taskRepository.delete(task) } returns Unit
 
         taskService.deleteTask(5L, admin)
 
-        verify(exactly = 1) { repository.delete(task) }
+        verify(exactly = 1) { taskRepository.delete(task) }
     }
 
     @Test
@@ -237,11 +237,11 @@ class TaskServiceTest {
         val invader = createUserEntity(id = 20L, name = "invader")
         val task = createTaskEntity(id = 5L, user = owner)
 
-        every { repository.findById(5L) } returns Optional.of(task)
+        every { taskRepository.findById(5L) } returns Optional.of(task)
 
         assertThrows<BusinessException> { taskService.deleteTask(5L, invader) }
 
-        verify(exactly = 0) { repository.delete(any()) }
+        verify(exactly = 0) { taskRepository.delete(any()) }
     }
 
     @Test
@@ -249,11 +249,11 @@ class TaskServiceTest {
         val taskId = 500L
         val user = createUserEntity()
 
-        every { repository.findById(taskId) } returns Optional.empty()
+        every { taskRepository.findById(taskId) } returns Optional.empty()
 
         assertThrows<ResourceNotFoundException> { taskService.deleteTask(taskId, user) }
 
-        verify(exactly = 0) { repository.delete(any()) }
+        verify(exactly = 0) { taskRepository.delete(any()) }
     }
 
     @Test
@@ -267,7 +267,7 @@ class TaskServiceTest {
 
         val tasksPage = PageImpl(tasks, pageable, tasks.size.toLong())
 
-        every { repository.findAll(pageable) } returns tasksPage
+        every { taskRepository.findAll(pageable) } returns tasksPage
 
         val result = taskService.getAllTasks(pageable)
 
@@ -275,7 +275,7 @@ class TaskServiceTest {
         assertEquals("first task", result.content[0].title)
         assertEquals("second task", result.content[1].title)
 
-        verify(exactly = 1) { repository.findAll(pageable) }
+        verify(exactly = 1) { taskRepository.findAll(pageable) }
     }
 
     @Test
@@ -283,12 +283,12 @@ class TaskServiceTest {
         val pageable = PageRequest.of(0, 10)
         val emptyPage = PageImpl<Task>(emptyList(), pageable, 0)
 
-        every { repository.findAll(pageable) } returns emptyPage
+        every { taskRepository.findAll(pageable) } returns emptyPage
         val result = taskService.getAllTasks(pageable)
 
         assertEquals(0, result.content.size)
 
-        verify(exactly = 1) { repository.findAll(pageable) }
+        verify(exactly = 1) { taskRepository.findAll(pageable) }
     }
 
     @Test
@@ -297,27 +297,27 @@ class TaskServiceTest {
         val user = createUserEntity(id = 10L)
         val task = createTaskEntity(id = taskId, title = "task title", user = user)
 
-        every { repository.findById(taskId) } returns Optional.of(task)
+        every { taskRepository.findById(taskId) } returns Optional.of(task)
 
         val result = taskService.getTaskById(taskId)
 
         assertEquals(taskId, result.id)
         assertEquals("task title", result.title)
 
-        verify(exactly = 1) { repository.findById(taskId) }
+        verify(exactly = 1) { taskRepository.findById(taskId) }
     }
 
     @Test
     fun `should throw ResourceNotFoundException when task does not exist`() {
         val taskId = 500L
 
-        every { repository.findById(taskId) } returns Optional.empty()
+        every { taskRepository.findById(taskId) } returns Optional.empty()
 
         val exception = assertThrows<ResourceNotFoundException> { taskService.getTaskById(taskId) }
 
         assertEquals("Task not found", exception.message)
 
-        verify(exactly = 1) { repository.findById(taskId) }
+        verify(exactly = 1) { taskRepository.findById(taskId) }
     }
 
     @Test
@@ -329,7 +329,7 @@ class TaskServiceTest {
         val taskPage = PageImpl(tasks, pageable, tasks.size.toLong())
 
         every { userService.getUserById(userId) } returns mockk()
-        every { repository.findByUserId(userId, pageable) } returns taskPage
+        every { taskRepository.findByUserId(userId, pageable) } returns taskPage
 
         val result = taskService.getTasksByUserId(userId, pageable)
 
@@ -337,7 +337,7 @@ class TaskServiceTest {
         assertEquals("user task", result.content[0].title)
 
         verify(exactly = 1) { userService.getUserById(userId) }
-        verify(exactly = 1) { repository.findByUserId(userId, pageable) }
+        verify(exactly = 1) { taskRepository.findByUserId(userId, pageable) }
     }
 
     @Test
@@ -347,14 +347,14 @@ class TaskServiceTest {
         val emptyPage = PageImpl<Task>(emptyList(), pageable, 0)
 
         every { userService.getUserById(userId) } returns mockk()
-        every { repository.findByUserId(userId, pageable) } returns emptyPage
+        every { taskRepository.findByUserId(userId, pageable) } returns emptyPage
 
         val result = taskService.getTasksByUserId(userId, pageable)
 
         assertEquals(0, result.content.size)
 
         verify(exactly = 1) { userService.getUserById(userId) }
-        verify(exactly = 1) { repository.findByUserId(userId, pageable) }
+        verify(exactly = 1) { taskRepository.findByUserId(userId, pageable) }
     }
 
     @Test
@@ -366,6 +366,6 @@ class TaskServiceTest {
 
         assertThrows<ResourceNotFoundException> { taskService.getTasksByUserId(userId, pageable) }
 
-        verify(exactly = 0) { repository.findByUserId(any(), any()) }
+        verify(exactly = 0) { taskRepository.findByUserId(any(), any()) }
     }
 }

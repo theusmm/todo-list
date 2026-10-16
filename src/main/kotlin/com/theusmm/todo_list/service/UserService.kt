@@ -49,19 +49,6 @@ class UserService(
         return saveUserWithRole(user, UserRole.ADMIN).toResponseDto()
     }
 
-    // create users
-    private fun saveUserWithRole(user: UserCreateRequestDto, role: UserRole): User {
-        if (repository.existsByEmail(user.email)) {
-            throw AccessDeniedException("This E-mail is already registered!")
-        }
-
-        val newUser = user.toCreateEntity()
-        newUser.password = passwordEncoder.encode(user.password)!!
-        newUser.role = role
-
-        return repository.save(newUser)
-    }
-
     @CacheEvict(cacheNames = ["users"], allEntries = true)
     @Transactional
     fun updateUser(user: UserUpdateRequestDto, userId: Long): UserResponseDto {
@@ -80,6 +67,19 @@ class UserService(
         repository.delete(user)
     }
 
-    fun checkIfUserExists(userId: Long): User = repository.findById(userId)
+    // create users
+    private fun saveUserWithRole(user: UserCreateRequestDto, role: UserRole): User {
+        if (repository.existsByEmail(user.email)) {
+            throw AccessDeniedException("This E-mail is already registered!")
+        }
+
+        val newUser = user.toCreateEntity()
+        newUser.password = passwordEncoder.encode(user.password)!!
+        newUser.role = role
+
+        return repository.save(newUser)
+    }
+
+    private fun checkIfUserExists(userId: Long): User = repository.findById(userId)
         .orElseThrow { ResourceNotFoundException("User not found") }
 }
