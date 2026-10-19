@@ -14,7 +14,7 @@ import java.time.ZoneOffset
 @Service
 class TokenService {
 
-    @Value("\${api.security.token.secret}")
+    @Value($$"${api.security.token.secret}")
     private lateinit var secret: String
 
     fun generateToken(user: User): String {
