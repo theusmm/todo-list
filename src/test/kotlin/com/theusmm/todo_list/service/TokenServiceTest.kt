@@ -93,5 +93,9 @@ class TokenServiceTest {
             .withSubject("user@email.com")
             .withExpiresAt(Date.from(java.time.Instant.now().minusSeconds(60)))
             .sign(Algorithm.HMAC256(secret))
+
+        val result = tokenService.validateToken(expiratedToken)
+
+        assertEquals("", result)
     }
 }
