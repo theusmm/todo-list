@@ -63,7 +63,7 @@ class TaskController(private val service: TaskService) {
         @PathVariable userId: Long,
         @Valid @RequestBody task: TaskCreateRequestDto
     ): ResponseEntity<TaskResponseDto> {
-        val response = service.createTaskForUser(task, userId)
+        val response = service.createTaskForUser(userId, task)
         return ResponseEntity.status(HttpStatus.CREATED).body(response)
     }
 

@@ -42,7 +42,6 @@ class UserControllerIntegrationTest {
 
     @Test
     fun `should return bad request when create request is invalid`() {
-
         mockMvc.perform(
             post("/users")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -61,14 +60,12 @@ class UserControllerIntegrationTest {
 
     @Test
     fun `should reject unauthenticated request to protected route`() {
-
         mockMvc.perform(get("/users/me"))
             .andExpect(status().isForbidden)
     }
 
     @Test
     fun `should reject regular user from admin route`() {
-
         val regularUser = createUserEntity(id = 10L, email = "user@email.com", role = UserRole.USER)
         val token = tokenFor(regularUser)
 
@@ -81,7 +78,6 @@ class UserControllerIntegrationTest {
 
     @Test
     fun `should allow admin to create admin user`() {
-
         val admin = createUserEntity(id = 1L, email = "admin@email.com", role = UserRole.ADMIN)
         val token = tokenFor(admin)
 

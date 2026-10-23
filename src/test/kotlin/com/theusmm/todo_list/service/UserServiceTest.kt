@@ -35,7 +35,6 @@ class UserServiceTest {
 
     @Test
     fun `should return all users for the requested page`() {
-
         val pageable = PageRequest.of(0, 10)
         val users = listOf(
             createUserEntity(id = 1L, name = "user 1", email = "user1@email.com"),
@@ -59,7 +58,6 @@ class UserServiceTest {
 
     @Test
     fun `should return an empty page when there are no users`() {
-
         val pageable = PageRequest.of(0, 10)
         val emptyPage = PageImpl<User>(emptyList(),pageable, 0)
 
@@ -74,7 +72,6 @@ class UserServiceTest {
 
     @Test
     fun `should return user successfully`() {
-
         val userId = 10L
         val user = createUserEntity(id = userId, name = "user 1", email = "user1@email.com")
 
@@ -91,7 +88,6 @@ class UserServiceTest {
 
     @Test
     fun `should throw ResourceNotFoundException when user does not exist`() {
-
         val userId = 10L
 
         every { userRepository.findById(userId) } returns Optional.empty()
@@ -104,8 +100,7 @@ class UserServiceTest {
     }
 
     @Test
-    fun `should create user with USER role andencoded password`() {
-
+    fun `should create user with USER role unencoded password`() {
         val request = createUserCreateRequestDto(name = "user 1", email = "user1@email.com")
         val encodedPassword = "encoded-password"
         val savedUser = slot<User>()
@@ -127,7 +122,6 @@ class UserServiceTest {
 
     @Test
     fun `should create user with ADMIN role and encoded password`() {
-
         val request = createUserCreateRequestDto(name = "admin", email = "admin@email.com")
         val encodedPassword = "encoded-password"
         val savedUser = slot<User>()
@@ -149,7 +143,6 @@ class UserServiceTest {
 
     @Test
     fun `should reject user creation when email is already registered`() {
-
         val request = createUserCreateRequestDto()
 
         every { userRepository.existsByEmail(request.email) } returns true
@@ -164,7 +157,6 @@ class UserServiceTest {
 
     @Test
     fun `should update user name and encode the new password`() {
-
         val userId = 10L
         val existingUser = createUserEntity(id = userId, name = "old name", email = "user1@email.com")
         val request = createUserUpdateRequestDto(name = "updated name")
@@ -189,7 +181,6 @@ class UserServiceTest {
 
     @Test
     fun `should throw ResourceNotFoundException when updating a user that does not exist`() {
-
         val userId = 10L
         val request = createUserUpdateRequestDto()
 
@@ -205,7 +196,6 @@ class UserServiceTest {
 
     @Test
     fun `should delete user`() {
-
         val userId = 10L
         val user = createUserEntity(id = userId, name = "user 1")
 

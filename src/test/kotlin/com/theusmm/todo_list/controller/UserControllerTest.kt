@@ -29,7 +29,6 @@ class UserControllerTest {
 
     @Test
     fun `should create user and return created status`() {
-
         val request = createUserCreateRequestDto(name = "test user", email = "testUser@email.com")
         val expectedResponse = UserResponseDto(id = 1L, name = "test user", email = "testUser@email.com")
 
@@ -45,7 +44,6 @@ class UserControllerTest {
 
     @Test
     fun `should update authenticated user and return ok status`() {
-
         val userId = 15L
         val loggedUser = createUserEntity(id = userId)
         val request = createUserUpdateRequestDto(name = "updated user")
@@ -63,7 +61,6 @@ class UserControllerTest {
 
     @Test
     fun `should delete authenticated user and return no content status`() {
-
         val loggedUser = createUserEntity(id = 15L)
 
         every { userService.deleteUser(loggedUser.id!!) } returns Unit
@@ -78,7 +75,6 @@ class UserControllerTest {
 
     @Test
     fun `should create admin and return created status`() {
-
         val request = createUserCreateRequestDto(name = "admin user", email = "admin@email.com")
         val expectedResponse = UserResponseDto(id = 1L, name = "admin user", email = "admin@email.com")
 
@@ -94,7 +90,6 @@ class UserControllerTest {
 
     @Test
     fun `should return all users with ok status`() {
-
         val pageable = PageRequest.of(0, 10, Sort.by("name"))
         val expectedPage = CustomPageDto(
             content = listOf(
@@ -115,7 +110,6 @@ class UserControllerTest {
 
     @Test
     fun `should return user by id with ok status`() {
-
         val userId = 15L
         val expectedUser = UserResponseDto(userId, name = "test user", email = "testUser@email.com")
 
@@ -131,7 +125,6 @@ class UserControllerTest {
 
     @Test
     fun `should update user by id and return ok status`() {
-
         val userId = 15L
         val loggedUser = createUserEntity(id = userId)
         val request = createUserUpdateRequestDto(name = "updated user")
@@ -149,7 +142,6 @@ class UserControllerTest {
 
     @Test
     fun `should delete user by id and return no content status`() {
-
         val userId = 15L
 
         every { userService.deleteUser(userId) } returns Unit

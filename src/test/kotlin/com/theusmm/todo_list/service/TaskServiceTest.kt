@@ -66,7 +66,7 @@ class TaskServiceTest {
         every { userRepository.findById(userId) } returns Optional.of(targetUser)
         every { taskRepository.save(any()) } answers { firstArg() }
 
-        val response = taskService.createTaskForUser(request, userId)
+        val response = taskService.createTaskForUser(userId, request)
 
         assertEquals("target user task", response.title)
 
@@ -106,7 +106,7 @@ class TaskServiceTest {
 
         every { userRepository.findById(userId) } returns Optional.empty()
 
-        val exception = assertThrows<ResourceNotFoundException> { taskService.createTaskForUser(request, userId) }
+        val exception = assertThrows<ResourceNotFoundException> { taskService.createTaskForUser(userId, request) }
 
         assertEquals("User not found", exception.message)
 
@@ -132,7 +132,6 @@ class TaskServiceTest {
     fun `should let user update their own task`() {
         val owner = createUserEntity(id = 10L, name = "owner")
         val task = createTaskEntity(id = 5L, title = "old title", user = owner)
-
         val request = createTaskUpdateRequestDto(title = "new title")
 
         every { taskRepository.findById(5L) } returns Optional.of(task)

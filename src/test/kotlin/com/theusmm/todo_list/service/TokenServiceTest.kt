@@ -20,7 +20,6 @@ class TokenServiceTest {
     fun setup() {
         tokenService = TokenService()
 
-        // Injects the value that, in production, would be loaded by Spring's @Value method.
         val secretField = TokenService::class.java.getDeclaredField("secret")
         secretField.isAccessible = true
         secretField.set(tokenService, secret)
@@ -28,7 +27,6 @@ class TokenServiceTest {
 
     @Test
     fun `should generate token with user information and expiration`() {
-
         val user = createUserEntity(email = "admin@email.com", role = UserRole.ADMIN)
         val token = tokenService.generateToken(user)
         val decodedToken = JWT.require(Algorithm.HMAC256(secret))
@@ -44,7 +42,6 @@ class TokenServiceTest {
 
     @Test
     fun `should return subject when token is valid`() {
-
         val user = createUserEntity(email  = "user@email.com")
         val token = tokenService.generateToken(user)
         val result = tokenService.validateToken(token)
@@ -54,15 +51,12 @@ class TokenServiceTest {
 
     @Test
     fun `should return empty string when token is invalid`() {
-
         val result = tokenService.validateToken("invalid-token")
-
         assertEquals("", result)
     }
 
     @Test
     fun `should return empty string when token has invalid signature`() {
-
         val tokenWithDifferentSecret = JWT.create()
             .withIssuer("todo-list-api")
             .withSubject("user@email.com")
@@ -75,7 +69,6 @@ class TokenServiceTest {
 
     @Test
     fun `should return empty string when token has invalid issuer`() {
-
         val tokenWithDifferentIssuer = JWT.create()
             .withIssuer("another-issuer")
             .withSubject("user@email.com")

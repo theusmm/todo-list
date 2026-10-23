@@ -38,7 +38,7 @@ class TaskService(
 
     @CacheEvict(cacheNames = ["tasks", "tasksByUserId", "tasksByLoggedUser"], allEntries = true)
     @Transactional
-    fun createTaskForUser(task: TaskCreateRequestDto, userId: Long): TaskResponseDto {
+    fun createTaskForUser(userId: Long, task: TaskCreateRequestDto): TaskResponseDto {
         val targetUser = userRepository.findById(userId)
             .orElseThrow { ResourceNotFoundException("User not found") }
 
