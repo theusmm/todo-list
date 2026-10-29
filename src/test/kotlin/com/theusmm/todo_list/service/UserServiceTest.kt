@@ -100,7 +100,7 @@ class UserServiceTest {
     }
 
     @Test
-    fun `should create user with USER role unencoded password`() {
+    fun `should create user with USER role and encoded password`() {
         val request = createUserCreateRequestDto(name = "user 1", email = "user1@email.com")
         val encodedPassword = "encoded-password"
         val savedUser = slot<User>()
