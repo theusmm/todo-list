@@ -85,6 +85,53 @@ class AuthControllerIntegrationTest(@Autowired private val mockMvc: MockMvc) {
 
        verifyNoInteractions(userRepository, passwordEncoder, tokenService)
    }
+
+    @Test
+    fun `POST login should return 401 when email is not registered`() {
+        val email = "not-registered@email.com"
+
+        given(userRepository.findByEmail(email)).willReturn(null)
+
+        mockMvc.perform(
+            post("/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(
+                    """
+                {
+                  "email": "$email",
+                  "password": "senha123"
+                }
+                """.trimIndent()
+                )
+        )
+            .andExpect(status().isUnauthorized)
+            .andExpect(content().string(""))
+    }
+
+    @Test
+    fun `POST login should return 401 when password is incorrect`() {
+        val email = "user@email.com"
+        val password = "incorrect-password"
+        val user = User(id = 10L, name = "user", email = email, password = password)
+
+        given(userRepository.findByEmail(email)).willReturn(user)
+        given(passwordEncoder.matches(password, user.password)).willReturn(false)
+
+        mockMvc.perform(
+            post("/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(
+                    """
+                {
+                  "email": "$email",
+                  "password": "$password"
+                }
+                """.trimIndent()
+                )
+        )
+            .andExpect(status().isUnauthorized)
+            .andExpect(content().string(""))
+    }
 }
 
 @TestConfiguration(proxyBeanMethods = false)
