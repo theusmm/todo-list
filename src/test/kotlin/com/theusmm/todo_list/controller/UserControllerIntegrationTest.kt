@@ -301,4 +301,16 @@ class UserControllerIntegrationTest {
         )
             .andExpect(status().isBadRequest)
     }
+
+    @Test
+    fun `should reject regular user from listing all users`() {
+        val regularUser = createUserEntity(id = 10L)
+        val token = tokenFor(regularUser)
+
+        mockMvc.perform(
+            get("/users")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer $token")
+        )
+            .andExpect(status().isForbidden)
+    }
 }
