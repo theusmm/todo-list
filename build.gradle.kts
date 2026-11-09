@@ -31,6 +31,7 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-data-redis")
 	implementation("org.flywaydb:flyway-core")
 	implementation("org.springframework.boot:spring-boot-starter-flyway")
+	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.2.0")
 	runtimeOnly("org.flywaydb:flyway-database-postgresql:10.15.0")
 	implementation("org.postgresql:postgresql:42.7.14")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")

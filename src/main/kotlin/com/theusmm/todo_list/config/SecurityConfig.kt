@@ -35,6 +35,8 @@ class SecurityConfig(
                 auth.requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
                 auth.requestMatchers(HttpMethod.POST, "/users").permitAll()
 
+                auth.requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**").permitAll()
+
                 // /users
                 auth.requestMatchers("/users/me").authenticated()
 
