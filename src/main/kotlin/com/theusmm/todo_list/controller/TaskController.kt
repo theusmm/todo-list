@@ -101,8 +101,8 @@ class TaskController(private val service: TaskService) {
     @ApiResponses(
         value = [
             ApiResponse(responseCode = "204", description = "Task deleted with no response body"),
-            ApiResponse(responseCode = "400", description = "Task does not belong to the authenticated user"),
-            ApiResponse(responseCode = "401", description = "Authentication is required or the token is invalid"),
+            ApiResponse(responseCode = "400", description = "Request validation failed or request data is invalid"),
+            ApiResponse(responseCode = "403", description = "User does not have permission to modify this task"),
             ApiResponse(responseCode = "404", description = "Task not found"),
             ApiResponse(responseCode = "500", description = "Unexpected error")
         ]
@@ -126,7 +126,7 @@ class TaskController(private val service: TaskService) {
     @ApiResponses(
         value = [
             ApiResponse(responseCode = "201", description = "Task created"),
-            ApiResponse(responseCode = "400", description = "Invalid data"),
+            ApiResponse(responseCode = "400", description = "Request validation failed or request data is invalid"),
             ApiResponse(responseCode = "401", description = "Authentication is required or the token is invalid"),
             ApiResponse(responseCode = "403", description = "User does not have the ADMIN role"),
             ApiResponse(responseCode = "404", description = "User not found"),

@@ -16,14 +16,17 @@ class GlobalExceptionHandler {
 
     // not foun 404
     @ExceptionHandler(ResourceNotFoundException::class)
-    fun handleResourceNotFound(ex: ResourceNotFoundException): ResponseEntity<ErrorResponse> {
+    fun handleResourceNotFound(
+        ex: ResourceNotFoundException,
+        request: HttpServletRequest): ResponseEntity<ErrorResponse> {
 
         val status = HttpStatus.NOT_FOUND
 
         val error = ErrorResponse(
             status = status.value(),
             error = "Not Found",
-            message = ex.message
+            message = ex.message,
+            path = request.requestURI
         )
         return ResponseEntity.status(status).body(error)
     }
@@ -38,12 +41,11 @@ class GlobalExceptionHandler {
 
         val error = ErrorResponse(
             status = status.value(),
-            error = "Acceess Denied",
+            error = "Access Denied",
             message = ex.message,
             path = request.requestURI
         )
         return ResponseEntity.status(status).body(error)
-
     }
 
     // bad request 400
@@ -67,7 +69,9 @@ class GlobalExceptionHandler {
 
     // Bean Validation 400
     @ExceptionHandler(MethodArgumentNotValidException::class)
-    fun handleValidationException(ex: MethodArgumentNotValidException): ResponseEntity<ErrorResponse> {
+    fun handleValidationException(
+        ex: MethodArgumentNotValidException,
+        request: HttpServletRequest): ResponseEntity<ErrorResponse> {
 
         // Join DTO messages into a single string.
         val errors = ex.bindingResult.fieldErrors
@@ -78,7 +82,8 @@ class GlobalExceptionHandler {
         val error = ErrorResponse(
             status = status.value(),
             error = "Validation Error",
-            message = errors
+            message = errors,
+            path = request.requestURI
         )
         return ResponseEntity.status(status).body(error)
     }

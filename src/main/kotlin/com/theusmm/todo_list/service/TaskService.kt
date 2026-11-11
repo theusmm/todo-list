@@ -7,6 +7,7 @@ import com.theusmm.todo_list.dto.response.TaskResponseDto
 import com.theusmm.todo_list.entity.Task
 import com.theusmm.todo_list.entity.User
 import com.theusmm.todo_list.entity.UserRole
+import com.theusmm.todo_list.exception.AccessDeniedException
 import com.theusmm.todo_list.exception.BusinessException
 import com.theusmm.todo_list.exception.ResourceNotFoundException
 import com.theusmm.todo_list.mapper.toCreateEntity
@@ -106,7 +107,7 @@ fun getTaskById(taskId: Long): TaskResponseDto {
 
     private fun validateTaskOwnerOrAdmin(task: Task, loggedUser: User) {
         if (task.user.id != loggedUser.id && loggedUser.role != UserRole.ADMIN) {
-            throw BusinessException("You cannot modify this task")
+            throw AccessDeniedException("You cannot modify this task")
         }
     }
 }
